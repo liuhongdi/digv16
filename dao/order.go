@@ -2,9 +2,10 @@ package dao
 
 import (
 	"errors"
-	"gorm.io/gorm"
+	"fmt"
 	"github.com/liuhongdi/digv16/global"
 	"github.com/liuhongdi/digv16/model"
+	"gorm.io/gorm"
 )
 
 //添加一个订单
@@ -39,8 +40,10 @@ func AddOneOrder(goodsId int64,buyNum int) (*model.Order, error) {
 func AddOneOrderTx(goodsId int64,buyNum int) (*model.Order, error) {
 	// 事务开始后，需要使用 tx 处理数据
 	tx := global.DBLink.Begin()
+
 	defer func() {
 		if r := recover(); r != nil {
+			fmt.Println("this is in defer recover")
 			tx.Rollback()
 		}
 	}()
@@ -56,6 +59,11 @@ func AddOneOrderTx(goodsId int64,buyNum int) (*model.Order, error) {
 		tx.Rollback()
 		return nil,resultCO.Error
 	}
+
+	var z int = 0
+	var i int = 100 / z
+	fmt.Println("i:%i",i)
+
 	//减库存
 	result := tx.Debug().Table("m_goods").Where("goodsId = ? and stock >= ?", goodsId,buyNum).Update("stock", gorm.Expr("stock - ?", buyNum))
 	if (result.Error != nil) {
@@ -75,11 +83,14 @@ func AddOneOrderTx(goodsId int64,buyNum int) (*model.Order, error) {
 		return nil,resultCOG.Error
 	}
     //commit
+    fmt.Println("begin commit")
 	errCM := tx.Commit().Error
 	if (errCM != nil) {
+		fmt.Println("begin return1")
 		tx.Rollback()
 		return nil,errCM
 	}else {
+		fmt.Println("begin return2")
 		return &order,nil
 	}
 }

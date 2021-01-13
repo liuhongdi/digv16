@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/liuhongdi/digv16/global"
 	"github.com/liuhongdi/digv16/service"
@@ -38,8 +39,13 @@ func (o *OrderController) AddOneTx(c *gin.Context) {
 	buyNum:=11;
 
 	orderOne,err := service.AddOneOrderTx(int64(goodsId),buyNum);
-	if err != nil {
-		result.Error(404,"数据处理错误")
+
+	fmt.Println("orderOne:");
+	fmt.Println(orderOne);
+	fmt.Println(":end:");
+	//if ()
+	if (orderOne == nil || err != nil) {
+		result.Error(20001,"数据处理错误")
 	} else {
 		result.Success(&orderOne);
 	}
